@@ -1,0 +1,21 @@
+# OS junk
+.DS_Store
+
+# Dependencies (also covered by nested .gitignore files)
+node_modules/
+
+# Secrets — never commit real env files
+.env
+.env.local
+.env*.local
+
+# Next.js build output
+.next/
+
+# Mac listener runtime artifacts (fetched/created on the Mac Pro)
+mac-listener/ffmpeg
+mac-listener/ffmpeg.zip
+mac-listener/listener.log
+
+# JetBrains IDE
+.idea/
