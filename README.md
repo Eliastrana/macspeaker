@@ -1,5 +1,9 @@
 # Mac Speaker
 
+![Explanation](explanation.png)
+
+### Are you struggling to reach those in your home, who might have their phone on silent, even though they asked you to buy something pretty vague at the store, and you are not quite sure which version on the item you were meant to purchase? Well, now this is solved, with the Mac Pro Speaker! A simple system that allows you to send voice notes from your phone, to be played out loud on the Mac Pro (It is loud). 
+
 Record a voice note on your phone → it plays out loud on the always-on Mac Pro.
 
 No polling, no Vercel functions: the website only writes to Supabase, and the
