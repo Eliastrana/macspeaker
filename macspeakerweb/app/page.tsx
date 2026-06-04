@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase, BUCKET } from "@/lib/supabaseClient";
+import PinGate from "./PinGate";
 
 type Status =
   | { kind: "idle" }
@@ -32,6 +33,17 @@ export default function Home() {
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [sender, setSender] = useState("");
   const [seconds, setSeconds] = useState(0);
+  const [unlocked, setUnlocked] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem("macspeaker_unlocked") === "1") {
+        setUnlocked(true);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -135,27 +147,35 @@ export default function Home() {
   const isRecording = status.kind === "recording";
   const isBusy = status.kind === "uploading";
 
+  if (!unlocked) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 py-16 font-sans dark:bg-black">
+        <PinGate onUnlock={() => setUnlocked(true)} />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 py-16 font-sans dark:bg-black">
       <main className="flex w-full max-w-md flex-col items-center gap-8">
         <div className="flex flex-col items-center gap-2 text-center">
           <h1 className="text-3xl font-semibold tracking-tight text-black dark:text-zinc-50">
-            🔊 Mac Speaker
+            Søppelbøtte Speaker
           </h1>
           <p className="text-zinc-600 dark:text-zinc-400">
-            Record a voice note — it plays out loud on the Mac.
+            Send en lydmelding til søppelbøtte-Macen
           </p>
         </div>
 
-        <input
-          type="text"
-          inputMode="text"
-          placeholder="Your name (optional)"
-          value={sender}
-          onChange={(e) => setSender(e.target.value)}
-          disabled={isRecording || isBusy}
-          className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base text-black outline-none focus:border-zinc-500 disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
-        />
+        {/*<input*/}
+        {/*  type="text"*/}
+        {/*  inputMode="text"*/}
+        {/*  placeholder="Your name (optional)"*/}
+        {/*  value={sender}*/}
+        {/*  onChange={(e) => setSender(e.target.value)}*/}
+        {/*  disabled={isRecording || isBusy}*/}
+        {/*  className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base text-black outline-none focus:border-zinc-500 disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"*/}
+        {/*/>*/}
 
         <button
           type="button"
@@ -167,18 +187,18 @@ export default function Home() {
               : "bg-zinc-900 hover:bg-zinc-700 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-200"
           }`}
         >
-          {isRecording ? `Stop · ${seconds}s` : isBusy ? "Sending…" : "Record"}
+          {isRecording ? `Stop · ${seconds}s` : isBusy ? "Sender…" : "Spill inn"}
         </button>
 
         <div className="h-6 text-center text-sm">
           {status.kind === "recording" && (
-            <span className="text-red-600">● Recording… tap to send</span>
+            <span className="text-red-600">● Tar opp… trykk for å sende</span>
           )}
           {status.kind === "uploading" && (
-            <span className="text-zinc-500">Uploading…</span>
+            <span className="text-zinc-500">Sender…</span>
           )}
           {status.kind === "sent" && (
-            <span className="text-green-600">✓ Sent! Playing on the Mac.</span>
+            <span className="text-green-600">✓ Sendt! Spilles av på Mac-en.</span>
           )}
           {status.kind === "error" && (
             <span className="text-red-600">⚠ {status.message}</span>
