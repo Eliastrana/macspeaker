@@ -116,7 +116,7 @@ export default function Home() {
       let message = "Could not access the microphone.";
       if (name === "NotAllowedError" || name === "SecurityError") {
         message =
-          "Mic blocked. Tap “aA” in the address bar → Website Settings → Microphone → Allow, then reload.";
+          "Mic blocked. Enable Microphone for your browser in your phone’s Settings, allow it for this site, then reload.";
       } else if (name === "NotFoundError") {
         message = "No microphone found on this device.";
       } else if (name === "NotReadableError") {
