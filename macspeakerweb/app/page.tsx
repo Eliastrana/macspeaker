@@ -111,11 +111,18 @@ export default function Home() {
       stopTimer();
       timerRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);
       setStatus({ kind: "recording" });
-    } catch {
-      setStatus({
-        kind: "error",
-        message: "Could not access the microphone. Check browser permissions.",
-      });
+    } catch (err) {
+      const name = err instanceof Error ? err.name : "";
+      let message = "Could not access the microphone.";
+      if (name === "NotAllowedError" || name === "SecurityError") {
+        message =
+          "Mic blocked. Tap “aA” in the address bar → Website Settings → Microphone → Allow, then reload.";
+      } else if (name === "NotFoundError") {
+        message = "No microphone found on this device.";
+      } else if (name === "NotReadableError") {
+        message = "The mic is busy in another app. Close it and try again.";
+      }
+      setStatus({ kind: "error", message });
     }
   }, [upload]);
 
