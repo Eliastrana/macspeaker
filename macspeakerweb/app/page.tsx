@@ -151,16 +151,22 @@ export default function Home() {
   const stopRecording = useCallback(() => {
     stopTimer();
     const recorder = mediaRecorderRef.current;
-    if (recorder && recorder.state !== "inactive") {
-      // Force a final flush before stopping (helps iOS deliver the last chunk).
+    mediaRecorderRef.current = null;
+    if (!recorder || recorder.state === "inactive") return;
+
+    // iOS drops the audio still sitting in the encoder buffer when you stop
+    // immediately, clipping the last word. Keep recording a moment longer,
+    // then flush and stop so the tail is captured.
+    setTimeout(() => {
       try {
-        recorder.requestData();
+        if (recorder.state !== "inactive") {
+          recorder.requestData();
+          recorder.stop();
+        }
       } catch {
         /* ignore */
       }
-      recorder.stop();
-    }
-    mediaRecorderRef.current = null;
+    }, 450);
   }, []);
 
   const isRecording = status.kind === "recording";
