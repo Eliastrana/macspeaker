@@ -114,10 +114,20 @@ export default function Home() {
         const blob = new Blob(chunksRef.current, {
           type: mimeType || "audio/webm",
         });
+        if (blob.size === 0) {
+          setStatus({
+            kind: "error",
+            message: "Opptaket ble tomt — prøv igjen og snakk i 1–2 sekunder.",
+          });
+          return;
+        }
         void upload(blob, extRef.current);
       };
 
-      recorder.start();
+      // Timeslice: emit a chunk every second so data is flushed incrementally.
+      // Without this, iOS Safari/Chrome can deliver a single empty chunk at
+      // stop, producing 0-byte recordings.
+      recorder.start(1000);
       mediaRecorderRef.current = recorder;
       setSeconds(0);
       stopTimer();
@@ -140,7 +150,16 @@ export default function Home() {
 
   const stopRecording = useCallback(() => {
     stopTimer();
-    mediaRecorderRef.current?.stop();
+    const recorder = mediaRecorderRef.current;
+    if (recorder && recorder.state !== "inactive") {
+      // Force a final flush before stopping (helps iOS deliver the last chunk).
+      try {
+        recorder.requestData();
+      } catch {
+        /* ignore */
+      }
+      recorder.stop();
+    }
     mediaRecorderRef.current = null;
   }, []);
 

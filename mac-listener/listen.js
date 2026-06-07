@@ -114,6 +114,11 @@ async function handleMessage(row) {
   if (!res.ok) throw new Error(`download failed: HTTP ${res.status}`);
   const buf = Buffer.from(await res.arrayBuffer());
 
+  if (buf.length === 0) {
+    log("⚠ skipping empty (0-byte) note");
+    return;
+  }
+
   const ext = (row.audio_path.split(".").pop() || "m4a").toLowerCase();
   const dir = await mkdtemp(join(tmpdir(), "macspeaker-"));
   const file = join(dir, `note.${ext}`);
